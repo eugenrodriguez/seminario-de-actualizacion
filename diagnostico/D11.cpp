@@ -1,5 +1,9 @@
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <sstream>
+
 #include <map>
 
 using namespace std;
@@ -108,13 +112,17 @@ void cambiarContrasenia(string usuario, map<string, Usuario> &usuarios)
 
 void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
 {
+    Rol rol = usuarios[usuario].rol;
     int op;
     do
     {
         cout << "MENU DE USUARIO" << endl;
         cout << "1. Cambiar contraseña" << endl;
         cout << "2. Gestion de articulos" << endl;
-        cout << "3. Salir" << endl;
+        if (rol == Administrador) {
+            cout << "3. Gestion de usuarios" << endl; // SOLO para administradores
+        }
+        cout << "0. Salir" << endl;
         cout << "Seleccione una opción: ";
         cin >> op;
         switch (op)
@@ -123,7 +131,14 @@ void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
             break;
         case 2: menuDeArticulos(usuario);
             break;
-        case 3:
+        case 3: 
+            if (rol == Administrador) {
+                registrarUsuario(); 
+            } else {
+                cout << "Acceso denegado. Solo administradores pueden gestionar usuarios." << endl;
+            }
+            break;
+        case 0:
             cout << "Saliendo al inicio del sistema..." << endl;
             menuDeInicio();
             break;
@@ -209,8 +224,6 @@ void registrarUsuario()
 
     usuarios[usuario] = {usuario, contrasenia, rol};
     cout << "Usuario registrado con éxito." << endl;
-    menuUsuarioAutenticado(usuario, usuarios);
-
 }
 
 void listarArticulos(){
@@ -384,15 +397,16 @@ void menuDeInicio()
     int op;
     cout << "----------------Menu de inicio---------------" << endl;
     cout << "1. Iniciar sesion" << endl;
-    cout << "2. Crear cuenta de usuario" << endl;
+    cout << "0. Salir" << endl;
     cout << "Seleccione una opcion: ";
     cin >> op;
     switch(op)
     {
         case 1: login();
         break;
-        case 2: registrarUsuario();
-        break;
+        case 2: cout << "Saliendo del sistema..." << endl;
+        exit(0);
+        default: cout << "Opcion invalida." << endl;
     }
 }
 
