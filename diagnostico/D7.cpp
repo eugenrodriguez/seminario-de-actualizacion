@@ -15,6 +15,7 @@ void listarArticulos();
 void cargarArticulo();
 void editarArticulo();
 void eliminarArticulo();
+void comprarArticulo();
 void menuDeArticulos();
 
 struct Articulo {
@@ -250,6 +251,36 @@ void eliminarArticulo(){
     }
 }
 
+void comprarArticulo(){
+    int id, cantidad;
+    cout << "Ingrese el ID del articulo que desea comprar ";
+    cin >> id;
+
+    auto it = articulos.find(id);
+    if(it == articulos.end()){
+        cout << "No se encontro ningun articul con ese ID. " << endl;
+        return;
+    }
+
+    cout << "Articulo: " << it->second.nombre << "| Stock disponible: " << it->second.stock << endl;
+    cout << "Cuantas unidades desea comprar? ";
+    cin >> cantidad;
+
+    if (cantidad <=0){
+        cout << "La cantidad debe ser mayor que cero. "<< endl;
+        return;
+    }else if (cantidad > it->second.stock) {
+        cout << "Error: No hay suficiente stock disponible. " << endl;
+        return;
+    }
+    else{
+        it->second.stock -= cantidad;
+        cout << "Compra realizada con exito. " << endl;
+    }
+
+
+}
+
 
 void menuDeArticulos(){
 
@@ -261,7 +292,8 @@ void menuDeArticulos(){
         cout << "2. Cargar articulo" << endl;
         cout << "3. Editar articulo" << endl;
         cout << "4. Eliminar articulo" << endl;
-        cout << "5. Volver al menu principal" << endl;
+        cout << "5. Comprar articulo" << endl;
+        cout << "0. Volver al menu principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
 
@@ -274,7 +306,9 @@ void menuDeArticulos(){
             break;
             case 4: eliminarArticulo();
             break;
-            case 5: return;
+            case 5: comprarArticulo();
+            break;
+            case 0: return;
             default: cout << "Opcion invalida";
             break;
         }

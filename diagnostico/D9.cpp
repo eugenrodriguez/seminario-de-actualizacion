@@ -4,6 +4,13 @@
 
 using namespace std;
 
+enum Rol {
+    Administrador,
+    Cliente,
+    Vendedor,
+    TrabajadorDeposito
+};
+
 bool corroborar(const string &usuario, const string &contrasenia);
 bool contraseniaSegura(const string &contrasenia);
 void cambiarContrasenia(string usuario, map<string, string> &usuarios);
@@ -15,7 +22,8 @@ void listarArticulos();
 void cargarArticulo();
 void editarArticulo();
 void eliminarArticulo();
-void menuDeArticulos();
+void comprarArticulo();
+void menuDeArticulos(string usuario);
 
 struct Articulo {
     string nombre;
@@ -29,18 +37,25 @@ map<int, Articulo> articulos ={
     {22, {"Jabon en polvo x 250g", 650.22, 407}}
 };
 
-map<string, string> usuarios = {
-    {"juan", "123456"},
-    {"Pedro", "123456"},
-    {"Carlos", "1234"}
+struct Usuario {
+    string nombreDeUsuario;
+    string contrasenia;
+    Rol rol;
+};
+
+map<string, Usuario> usuarios = {
+    {"juan", {"juan", "123456", Administrador}},
+    {"pedro", {"pedro", "12345", Cliente}},
+    {"carlos", {"carlos", "1234", Vendedor}},
+    {"franco", {"franco", "fran123", TrabajadorDeposito}}
 };
     
 
 bool corroborar(const string &usuario, const string &contrasenia)
 {
-    map<string, string>::iterator i = usuarios.find(usuario);
+    map<string, Usuario>::iterator i = usuarios.find(usuario);
 
-    if (i != usuarios.end() && i->second == contrasenia)
+    if (i != usuarios.end() && i->second.contrasenia == contrasenia)
     {
         return true;
     }
@@ -61,7 +76,6 @@ bool contraseniaSegura(const string &contrasenia)
             if (isupper(c))
                 tieneMayuscula = true;
     
-            // No es letra ni número → es un símbolo
             if (!isalnum(c))
                 simbolosEspeciales++;
         }
@@ -70,7 +84,7 @@ bool contraseniaSegura(const string &contrasenia)
     }
 }
 
-void cambiarContrasenia(string usuario, map<string, string> &usuarios)
+void cambiarContrasenia(string usuario, map<string, Usuario> &usuarios)
 {
     string nuevaContrasenia;
 
@@ -81,7 +95,7 @@ void cambiarContrasenia(string usuario, map<string, string> &usuarios)
 
         if (contraseniaSegura(nuevaContrasenia))
         {
-            usuarios[usuario] = nuevaContrasenia;
+            usuarios[usuario].contrasenia = nuevaContrasenia;
             cout << "Contraseña cambiada con éxito." << endl;
             break;
         }
@@ -92,7 +106,7 @@ void cambiarContrasenia(string usuario, map<string, string> &usuarios)
     } while (true);
 }
 
-void menuUsuarioAutenticado(string usuario, map<string, string> &usuarios)
+void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
 {
     int op;
     do
@@ -107,7 +121,7 @@ void menuUsuarioAutenticado(string usuario, map<string, string> &usuarios)
         {
         case 1: cambiarContrasenia(usuario, usuarios);
             break;
-        case 2: menuDeArticulos();
+        case 2: menuDeArticulos(usuario);
             break;
         case 3:
             cout << "Saliendo al inicio del sistema..." << endl;
@@ -152,6 +166,7 @@ void login()
 void registrarUsuario()
 {
     string nombre, apellido, email, usuario, contrasenia;
+    int rolSeleccionado;
     cout << "Nombre: ";
     cin >> nombre;
     cout << "Apellido: ";
@@ -162,18 +177,39 @@ void registrarUsuario()
     cin >> usuario;
     cout << "Contrasenia: ";
     cin >> contrasenia;
+    if(!contraseniaSegura(contrasenia))
+    {
+        do{
+            cout << "La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales. Intente nuevamente: ";
+            cin >> contrasenia;
+        }while (!contraseniaSegura(contrasenia));
+    }
+    cout << "Seleccione el rol del usuario: " << endl;
+    cout << "(1) Administrador." << endl;
+    cout << "(2) Cliente." << endl;
+    cout << "(3) Vendedor." << endl;
+    cout << "(4) Trabajador de deposito." << endl;
+    cin >> rolSeleccionado;
 
-    if(contraseniaSegura(contrasenia))
+    Rol rol;
+    switch(rolSeleccionado)
     {
-        usuarios[usuario] = contrasenia;
-        cout << "Usuario registrado con éxito." << endl;
-        menuUsuarioAutenticado(usuario, usuarios);
+        case 1: rol = Administrador;
+        break;
+        case 2: rol = Cliente;
+        break;
+        case 3: rol = Vendedor;
+        break;
+        case 4: rol = TrabajadorDeposito;
+        break;
+        default: cout << "Opcion invalida. ";
+        return;
     }
-    else
-    {
-        cout << "La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales." << endl;
-        registrarUsuario();
-    }
+
+    usuarios[usuario] = {usuario, contrasenia, rol};
+    cout << "Usuario registrado con éxito." << endl;
+    menuUsuarioAutenticado(usuario, usuarios);
+
 }
 
 void listarArticulos(){
@@ -208,7 +244,7 @@ void cargarArticulo(){
     cin >> nuevoArticulo.stock;
 
     articulos[id] = nuevoArticulo;
-    cout << "Articulo agregado correctamente";
+    cout << "Articulo agregado correctamente" << endl;
 
 }
 
@@ -233,7 +269,7 @@ void editarArticulo(){
     cout << "Nuevo stock (actual: " << it->second.stock << "): ";
     cin >> it->second.stock;
 
-    cout << "Articulo editado correctamente";
+    cout << "Articulo editado correctamente" << endl;
     
 }
 
@@ -243,38 +279,99 @@ void eliminarArticulo(){
     cin >> id;
 
     if (articulos.erase(id)){
-        cout << "Articulo eliminado con exito.";
+        cout << "Articulo eliminado con exito." << endl;
     }
     else{
         cout << "No se encontro ningun articulo con ese ID";
     }
 }
 
+void comprarArticulo(){
+    int id, cantidad;
+    cout << "Ingrese el ID del articulo que desea comprar ";
+    cin >> id;
 
-void menuDeArticulos(){
+    auto it = articulos.find(id);
+    if(it == articulos.end()){
+        cout << "No se encontro ningun articul con ese ID. " << endl;
+        return;
+    }
+
+    cout << "Articulo: " << it->second.nombre << "| Stock disponible: " << it->second.stock << endl;
+    cout << "Cuantas unidades desea comprar? ";
+    cin >> cantidad;
+
+    if (cantidad <=0){
+        cout << "La cantidad debe ser mayor que cero. "<< endl;
+        return;
+    }else if (cantidad > it->second.stock) {
+        cout << "Error: No hay suficiente stock disponible. " << endl;
+        return;
+    }
+    else{
+        it->second.stock -= cantidad;
+        cout << "Compra realizada con exito. " << endl;
+    }
+
+
+}
+
+
+void menuDeArticulos(string usuario){
+
+    Rol rol = usuarios[usuario].rol;
 
     do
     {
         int op;
         cout << "---------------Menu de Articulos----------------" << endl;
         cout << "1. Listar articulos" << endl;
-        cout << "2. Cargar articulo" << endl;
-        cout << "3. Editar articulo" << endl;
-        cout << "4. Eliminar articulo" << endl;
-        cout << "5. Volver al menu principal" << endl;
+        if (rol == Administrador || rol == TrabajadorDeposito) {
+            cout << "2. Cargar articulo" << endl;
+            cout << "4. Eliminar articulo" << endl;
+        }
+        if (rol == Administrador || rol == Vendedor || rol == TrabajadorDeposito) {
+            cout << "3. Editar articulo" << endl;
+        }
+        if (rol == Administrador || rol == Vendedor || rol == Cliente) {
+            cout << "5. Comprar articulo" << endl;
+        }
+        cout << "0. Volver al menu principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
 
         switch (op){
             case 1: listarArticulos();
             break;
-            case 2: cargarArticulo();
-            break;
-            case 3: editarArticulo();
-            break;
-            case 4: eliminarArticulo();
-            break;
-            case 5: return;
+            case 2: 
+                if (rol == Administrador || rol == TrabajadorDeposito) {
+                    cargarArticulo();
+                } else {
+                    cout << "Acción no permitida para su rol." << endl;
+                }
+                break;
+            case 3: 
+                if (rol == Administrador || rol == Vendedor || rol == TrabajadorDeposito) {
+                    editarArticulo();
+                } else {
+                    cout << "Acción no permitida para su rol." << endl;
+                }
+                break;
+            case 4: 
+                if (rol == Administrador || rol == TrabajadorDeposito) {
+                    eliminarArticulo();
+                } else {
+                    cout << "Acción no permitida para su rol." << endl;
+                }
+                break;
+            case 5:
+                if (rol == Administrador || rol == Vendedor || rol == Cliente) {
+                    comprarArticulo();
+                } else {
+                    cout << "Acción no permitida para su rol." << endl;
+                }
+                break;
+            case 0: return;
             default: cout << "Opcion invalida";
             break;
         }

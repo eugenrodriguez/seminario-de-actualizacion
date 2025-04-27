@@ -4,6 +4,13 @@
 
 using namespace std;
 
+enum Rol {
+    Administrador,
+    Cliente,
+    Vendedor,
+    TrabajadorDeposito
+};
+
 bool corroborar(const string &usuario, const string &contrasenia);
 bool contraseniaSegura(const string &contrasenia);
 void cambiarContrasenia(string usuario, map<string, string> &usuarios);
@@ -15,6 +22,7 @@ void listarArticulos();
 void cargarArticulo();
 void editarArticulo();
 void eliminarArticulo();
+void comprarArticulo();
 void menuDeArticulos();
 
 struct Articulo {
@@ -29,18 +37,25 @@ map<int, Articulo> articulos ={
     {22, {"Jabon en polvo x 250g", 650.22, 407}}
 };
 
-map<string, string> usuarios = {
-    {"juan", "123456"},
-    {"Pedro", "123456"},
-    {"Carlos", "1234"}
+struct Usuario {
+    string nombreDeUsuario;
+    string contrasenia;
+    Rol rol;
+};
+
+map<string, Usuario> usuarios = {
+    {"juan", {"juan", "123456", Administrador}},
+    {"pedro", {"pedro", "12345", Cliente}},
+    {"carlos", {"carlos", "1234", Vendedor}},
+    {"franco", {"franco", "fran123", TrabajadorDeposito}}
 };
     
 
 bool corroborar(const string &usuario, const string &contrasenia)
 {
-    map<string, string>::iterator i = usuarios.find(usuario);
+    map<string, Usuario>::iterator i = usuarios.find(usuario);
 
-    if (i != usuarios.end() && i->second == contrasenia)
+    if (i != usuarios.end() && i->second.contrasenia == contrasenia)
     {
         return true;
     }
@@ -61,7 +76,6 @@ bool contraseniaSegura(const string &contrasenia)
             if (isupper(c))
                 tieneMayuscula = true;
     
-            // No es letra ni número → es un símbolo
             if (!isalnum(c))
                 simbolosEspeciales++;
         }
@@ -70,7 +84,7 @@ bool contraseniaSegura(const string &contrasenia)
     }
 }
 
-void cambiarContrasenia(string usuario, map<string, string> &usuarios)
+void cambiarContrasenia(string usuario, map<string, Usuario> &usuarios)
 {
     string nuevaContrasenia;
 
@@ -81,7 +95,7 @@ void cambiarContrasenia(string usuario, map<string, string> &usuarios)
 
         if (contraseniaSegura(nuevaContrasenia))
         {
-            usuarios[usuario] = nuevaContrasenia;
+            usuarios[usuario].contrasenia = nuevaContrasenia;
             cout << "Contraseña cambiada con éxito." << endl;
             break;
         }
@@ -92,7 +106,7 @@ void cambiarContrasenia(string usuario, map<string, string> &usuarios)
     } while (true);
 }
 
-void menuUsuarioAutenticado(string usuario, map<string, string> &usuarios)
+void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
 {
     int op;
     do
@@ -152,6 +166,7 @@ void login()
 void registrarUsuario()
 {
     string nombre, apellido, email, usuario, contrasenia;
+    int rolSeleccionado;
     cout << "Nombre: ";
     cin >> nombre;
     cout << "Apellido: ";
@@ -162,18 +177,39 @@ void registrarUsuario()
     cin >> usuario;
     cout << "Contrasenia: ";
     cin >> contrasenia;
+    if(!contraseniaSegura(contrasenia))
+    {
+        do{
+            cout << "La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales. Intente nuevamente: ";
+            cin >> contrasenia;
+        }while (!contraseniaSegura(contrasenia));
+    }
+    cout << "Seleccione el rol del usuario: " << endl;
+    cout << "(1) Administrador." << endl;
+    cout << "(2) Cliente." << endl;
+    cout << "(3) Vendedor." << endl;
+    cout << "(4) Trabajador de deposito." << endl;
+    cin >> rolSeleccionado;
 
-    if(contraseniaSegura(contrasenia))
+    Rol rol;
+    switch(rolSeleccionado)
     {
-        usuarios[usuario] = contrasenia;
-        cout << "Usuario registrado con éxito." << endl;
-        menuUsuarioAutenticado(usuario, usuarios);
+        case 1: rol = Administrador;
+        break;
+        case 2: rol = Cliente;
+        break;
+        case 3: rol = Vendedor;
+        break;
+        case 4: rol = TrabajadorDeposito;
+        break;
+        default: cout << "Opcion invalida. ";
+        return;
     }
-    else
-    {
-        cout << "La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales." << endl;
-        registrarUsuario();
-    }
+
+    usuarios[usuario] = {usuario, contrasenia, rol};
+    cout << "Usuario registrado con éxito." << endl;
+    menuUsuarioAutenticado(usuario, usuarios);
+
 }
 
 void listarArticulos(){
@@ -250,6 +286,36 @@ void eliminarArticulo(){
     }
 }
 
+void comprarArticulo(){
+    int id, cantidad;
+    cout << "Ingrese el ID del articulo que desea comprar ";
+    cin >> id;
+
+    auto it = articulos.find(id);
+    if(it == articulos.end()){
+        cout << "No se encontro ningun articul con ese ID. " << endl;
+        return;
+    }
+
+    cout << "Articulo: " << it->second.nombre << "| Stock disponible: " << it->second.stock << endl;
+    cout << "Cuantas unidades desea comprar? ";
+    cin >> cantidad;
+
+    if (cantidad <=0){
+        cout << "La cantidad debe ser mayor que cero. "<< endl;
+        return;
+    }else if (cantidad > it->second.stock) {
+        cout << "Error: No hay suficiente stock disponible. " << endl;
+        return;
+    }
+    else{
+        it->second.stock -= cantidad;
+        cout << "Compra realizada con exito. " << endl;
+    }
+
+
+}
+
 
 void menuDeArticulos(){
 
@@ -261,7 +327,8 @@ void menuDeArticulos(){
         cout << "2. Cargar articulo" << endl;
         cout << "3. Editar articulo" << endl;
         cout << "4. Eliminar articulo" << endl;
-        cout << "5. Volver al menu principal" << endl;
+        cout << "5. Comprar articulo" << endl;
+        cout << "0. Volver al menu principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
 
@@ -274,7 +341,9 @@ void menuDeArticulos(){
             break;
             case 4: eliminarArticulo();
             break;
-            case 5: return;
+            case 5: comprarArticulo();
+            break;
+            case 0: return;
             default: cout << "Opcion invalida";
             break;
         }
