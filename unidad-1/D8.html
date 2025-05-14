@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Traducción de C++ a JavaScript</title>
+</head>
+<body>
+    <script>
+        const Rol = {
+            Administrador: 0,
+            Cliente: 1,
+            Vendedor: 2,
+            TrabajadorDeposito: 3
+        };
+
+        let articulos = new Map([
+            [1, { nombre: "Lavandina x 1l", precio: 875.25, stock: 3000 }],
+            [4, { nombre: "Detergente x 500l", precio: 1102.45, stock: 2010 }],
+            [22, { nombre: "Jabon en polvo x 250g", precio: 650.22, stock: 407 }]
+        ]);
+
+        let usuarios = new Map([
+            ["juan", { nombreDeUsuario: "juan", contrasenia: "123456", rol: Rol.Administrador }],
+            ["pedro", { nombreDeUsuario: "pedro", contrasenia: "12345", rol: Rol.Cliente }],
+            ["carlos", { nombreDeUsuario: "carlos", contrasenia: "1234", rol: Rol.Vendedor }],
+            ["franco", { nombreDeUsuario: "franco", contrasenia: "fran123", rol: Rol.TrabajadorDeposito }]
+        ]);
+
+        function corroborar(usuario, contrasenia) {
+            const user = usuarios.get(usuario);
+            return user && user.contrasenia === contrasenia;
+        }
+
+        function contraseniaSegura(contrasenia) {
+            if (contrasenia.length < 8 || contrasenia.length > 16) {
+                return false;
+            }
+
+            let tieneMayuscula = false;
+            let simbolosEspeciales = 0;
+
+            for (const char of contrasenia) {
+                if (char === char.toUpperCase() && char !== char.toLowerCase()) {
+                    tieneMayuscula = true;
+                }
+
+                if (!/[a-zA-Z0-9]/.test(char)) {
+                    simbolosEspeciales++;
+                }
+            }
+
+            return tieneMayuscula && simbolosEspeciales >= 2;
+        }
+
+        function cambiarContrasenia(usuario) {
+            let nuevaContrasenia;
+            while (true) {
+                nuevaContrasenia = prompt("Ingrese la nueva contraseña:");
+                if (contraseniaSegura(nuevaContrasenia)) {
+                    usuarios.get(usuario).contrasenia = nuevaContrasenia;
+                    alert("Contraseña cambiada con éxito.");
+                    break;
+                } else {
+                    alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales.");
+                }
+            }
+        }
+
+        function menuUsuarioAutenticado(usuario) {
+            let op;
+            do {
+                op = prompt(
+                    "MENU DE USUARIO\n" +
+                    "1. Cambiar contraseña\n" +
+                    "2. Gestion de articulos\n" +
+                    "3. Salir\n" +
+                    "Seleccione una opción:"
+                );
+                switch (parseInt(op)) {
+                    case 1:
+                        cambiarContrasenia(usuario);
+                        break;
+                    case 2:
+                        menuDeArticulos();
+                        break;
+                    case 3:
+                        alert("Saliendo al inicio del sistema...");
+                        menuDeInicio();
+                        return;
+                    default:
+                        alert("Opción no válida. Intente nuevamente.");
+                }
+            } while (true);
+        }
+
+        function login() {
+            let usuario, contrasenia;
+            let intentos = 0;
+            const max_intentos = 3;
+
+            while (intentos < max_intentos) {
+                usuario = prompt("Usuario:");
+                contrasenia = prompt("Contraseña:");
+
+                if (corroborar(usuario, contrasenia)) {
+                    alert(`¡Bienvenido/a ${usuario}!`);
+                    menuUsuarioAutenticado(usuario);
+                    return;
+                } else {
+                    intentos++;
+                    alert("Usuario y/o contraseña incorrecta.");
+                }
+
+                if (intentos === max_intentos) {
+                    alert("Usuario bloqueado. Contacte al administrador.");
+                    return;
+                }
+            }
+        }
+
+        function registrarUsuario() {
+            const nombre = prompt("Nombre:");
+            const apellido = prompt("Apellido:");
+            const email = prompt("Correo Electronico:");
+            const usuario = prompt("Nombre de usuario:");
+            let contrasenia;
+            do {
+                contrasenia = prompt("Contrasenia:");
+                if (!contraseniaSegura(contrasenia)) {
+                    alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales. Intente nuevamente.");
+                }
+            } while (!contraseniaSegura(contrasenia));
+
+            let rolSeleccionado;
+            do {
+                rolSeleccionado = parseInt(prompt(
+                    "Seleccione el rol del usuario:\n" +
+                    "(1) Administrador.\n" +
+                    "(2) Cliente.\n" +
+                    "(3) Vendedor.\n" +
+                    "(4) Trabajador de deposito."
+                ));
+            } while (isNaN(rolSeleccionado) || rolSeleccionado < 1 || rolSeleccionado > 4);
+
+            let rol;
+            switch (rolSeleccionado) {
+                case 1:
+                    rol = Rol.Administrador;
+                    break;
+                case 2:
+                    rol = Rol.Cliente;
+                    break;
+                case 3:
+                    rol = Rol.Vendedor;
+                    break;
+                case 4:
+                    rol = Rol.TrabajadorDeposito;
+                    break;
+                default:
+                    alert("Opción inválida.");
+                    return;
+            }
+
+            usuarios.set(usuario, { nombreDeUsuario: usuario, contrasenia: contrasenia, rol: rol });
+            alert("Usuario registrado con éxito.");
+            menuUsuarioAutenticado(usuario);
+        }
+
+        function listarArticulos() {
+            let lista = "---------------Listado de Articulos----------------\n";
+            for (const [id, articulo] of articulos) {
+                lista += `ID: ${id} | Nombre: ${articulo.nombre} | Precio: $${articulo.precio} | Stock: ${articulo.stock}\n`;
+            }
+            alert(lista);
+        }
+
+        function cargarArticulo() {
+            const id = parseInt(prompt("Ingrese ID del nuevo articulo:"));
+            if (articulos.has(id)) {
+                alert("Ya existe un articulo con ese ID.");
+                return;
+            }
+
+            const nombre = prompt("Nombre:");
+            const precio = parseFloat(prompt("Precio:"));
+            const stock = parseInt(prompt("Stock:"));
+
+            articulos.set(id, { nombre: nombre, precio: precio, stock: stock });
+            alert("Articulo agregado correctamente");
+        }
+
+        function editarArticulo() {
+            const id = parseInt(prompt("Ingrese el ID del articulo que desea editar:"));
+            const articulo = articulos.get(id);
+            if (!articulo) {
+                alert("No se encontró el artículo con ese ID");
+                return;
+            }
+
+            articulo.nombre = prompt(`Nuevo nombre (actual: ${articulo.nombre}):`, articulo.nombre);
+            articulo.precio = parseFloat(prompt(`Nuevo precio (actual: $${articulo.precio}):`, articulo.precio));
+            articulo.stock = parseInt(prompt(`Nuevo stock (actual: ${articulo.stock}):`, articulo.stock));
+
+            alert("Articulo editado correctamente");
+        }
+
+        function eliminarArticulo() {
+            const id = parseInt(prompt("Ingrese el ID del articulo a eliminar:"));
+            if (articulos.delete(id)) {
+                alert("Articulo eliminado con exito.");
+            } else {
+                alert("No se encontro ningun articulo con ese ID");
+            }
+        }
+
+        function comprarArticulo() {
+            const id = parseInt(prompt("Ingrese el ID del articulo que desea comprar:"));
+            const articulo = articulos.get(id);
+            if (!articulo) {
+                alert("No se encontro ningun articulo con ese ID.");
+                return;
+            }
+
+            const cantidad = parseInt(prompt(`Articulo: ${articulo.nombre} | Stock disponible: ${articulo.stock}\nCuantas unidades desea comprar?`));
+
+            if (cantidad <= 0) {
+                alert("La cantidad debe ser mayor que cero.");
+                return;
+            } else if (cantidad > articulo.stock) {
+                alert("Error: No hay suficiente stock disponible.");
+                return;
+            } else {
+                articulo.stock -= cantidad;
+                alert("Compra realizada con exito.");
+            }
+        }
+
+        function menuDeArticulos() {
+            let op;
+            do {
+                op = prompt(
+                    "---------------Menu de Articulos----------------\n" +
+                    "1. Listar articulos\n" +
+                    "2. Cargar articulo\n" +
+                    "3. Editar articulo\n" +
+                    "4. Eliminar articulo\n" +
+                    "5. Comprar articulo\n" +
+                    "0. Volver al menu principal\n" +
+                    "Seleccione una opcion:"
+                );
+
+                switch (parseInt(op)) {
+                    case 1:
+                        listarArticulos();
+                        break;
+                    case 2:
+                        cargarArticulo();
+                        break;
+                    case 3:
+                        editarArticulo();
+                        break;
+                    case 4:
+                        eliminarArticulo();
+                        break;
+                    case 5:
+                        comprarArticulo();
+                        break;
+                    case 0:
+                        return;
+                    default:
+                        alert("Opcion invalida");
+                        break;
+                }
+            } while (true);
+        }
+
+        function menuDeInicio() {
+            let op;
+            do {
+                op = prompt(
+                    "----------------Menu de inicio---------------\n" +
+                    "1. Iniciar sesion\n" +
+                    "2. Crear cuenta de usuario\n" +
+                    "Seleccione una opcion:"
+                );
+                switch (parseInt(op)) {
+                    case 1:
+                        login();
+                        return;
+                    case 2:
+                        registrarUsuario();
+                        return;
+                }
+            } while (true);
+        }
+
+        function main() {
+            while (true) {
+                menuDeInicio();
+                
+            }
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html>

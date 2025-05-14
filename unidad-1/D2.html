@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Login con Cambio de Contraseña</title>
+</head>
+<body>
+    <script>
+        function main() {
+            const usuarios = {
+                "juan": "123456",
+                "Pedro": "123456",
+                "Carlos": "1234"
+            };
+
+            function corroborar(usuario, contrasenia) {
+                return usuarios[usuario] === contrasenia;
+            }
+
+            function cambiarContrasenia(usuario) {
+                const nuevaContrasenia = prompt("Ingrese la nueva contraseña:");
+                if (nuevaContrasenia !== null && nuevaContrasenia.trim() !== "") {
+                    usuarios[usuario] = nuevaContrasenia;
+                    alert("Contraseña cambiada con éxito.");
+                } else {
+                    alert("Contraseña no válida.");
+                }
+            }
+
+            function menuUsuarioAutenticado(usuario) {
+                let op;
+                do {
+                    op = prompt(
+                        "\nMENU DE USUARIO\n" +
+                        "1. Cambiar contraseña\n" +
+                        "X. Salir\n" +
+                        "Seleccione una opción:"
+                    );
+                    
+                    if (op === null) return; 
+                    
+                    switch (op.toLowerCase()) {
+                        case "1":
+                            cambiarContrasenia(usuario);
+                            break;
+                        case "x":
+                            alert("Saliendo al inicio del sistema...");
+                            return;
+                        default:
+                            alert("Opción no válida. Intente nuevamente.");
+                    }
+                } while (true);
+            }
+
+            let intentos = 0;
+            const max_intentos = 3;
+
+            while (intentos < max_intentos) {
+                const usuario = prompt("Usuario:");
+                const contrasenia = prompt("Contraseña:");
+
+                if (corroborar(usuario, contrasenia)) {
+                    alert("¡Bienvenido/a " + usuario + "!");
+                    menuUsuarioAutenticado(usuario);
+                    break;
+                } else {
+                    intentos++;
+                    alert("Usuario y/o contraseña incorrecta.");
+
+                    if (intentos === max_intentos) {
+                        alert("Usuario bloqueado. Contacte al administrador.");
+                    }
+                }
+            }
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html>

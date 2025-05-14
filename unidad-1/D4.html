@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login de Usuarios</title>
+</head>
+<body>
+  <script>
+    let usuarios = {
+      "juan": "123456",
+      "Pedro": "123456",
+      "Carlos": "1234"
+    };
+
+    function corroborar(usuario, contrasenia) {
+      return usuarios.hasOwnProperty(usuario) && usuarios[usuario] === contrasenia;
+    }
+
+    function contraseniaSegura(contrasenia) {
+      if (contrasenia.length < 8 || contrasenia.length > 16) return false;
+
+      let tieneMayuscula = false;
+      let simbolosEspeciales = 0;
+
+      for (let c of contrasenia) {
+        if (c === c.toUpperCase() && /[A-Z]/.test(c)) {
+          tieneMayuscula = true;
+        }
+
+        if (!/[a-zA-Z0-9]/.test(c)) {
+          simbolosEspeciales++;
+        }
+      }
+
+      return tieneMayuscula && simbolosEspeciales >= 2;
+    }
+
+    function cambiarContrasenia(usuario) {
+      let nuevaContrasenia;
+
+      while (true) {
+        nuevaContrasenia = prompt("Ingrese la nueva contraseña:");
+
+        if (contraseniaSegura(nuevaContrasenia)) {
+          usuarios[usuario] = nuevaContrasenia;
+          alert("Contraseña cambiada con éxito.");
+          break;
+        } else {
+          alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales.");
+        }
+      }
+    }
+
+    function menuUsuarioAutenticado(usuario) {
+      let op;
+      do {
+        op = prompt("\nMENU DE USUARIO\n1. Cambiar contraseña\nX. Salir\nSeleccione una opción:");
+
+        switch (op) {
+          case '1':
+            cambiarContrasenia(usuario);
+            break;
+          case 'x':
+          case 'X':
+            alert("Saliendo al inicio del sistema...");
+            return;
+          default:
+            alert("Opción no válida. Intente nuevamente.");
+        }
+      } while (true);
+    }
+
+    function login() {
+      let intentos = 0;
+      const max_intentos = 3;
+
+      while (intentos < max_intentos) {
+        let usuario = prompt("Usuario:");
+        let contrasenia = prompt("Contraseña:");
+
+        if (corroborar(usuario, contrasenia)) {
+          alert("¡Bienvenido/a " + usuario + "!");
+          menuUsuarioAutenticado(usuario);
+          return;
+        } else {
+          intentos++;
+          alert("Usuario y/o contraseña incorrecta.");
+        }
+
+        if (intentos === max_intentos) {
+          alert("Usuario bloqueado. Contacte al administrador.");
+        }
+      }
+    }
+
+    function registrarUsuario() {
+      let nombre = prompt("Nombre:");
+      let apellido = prompt("Apellido:");
+      let email = prompt("Correo Electrónico:");
+      let usuario = prompt("Nombre de usuario:");
+      let contrasenia = prompt("Contraseña:");
+
+      if (contraseniaSegura(contrasenia)) {
+        usuarios[usuario] = contrasenia;
+        alert("Usuario registrado con éxito.");
+        menuUsuarioAutenticado(usuario);
+      } else {
+        alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales.");
+        registrarUsuario();
+      }
+    }
+
+    function menuDeInicio() {
+      let op = prompt("----------------Menu de inicio---------------\n1. Iniciar sesión\n2. Crear cuenta de usuario\nSeleccione una opción:");
+
+      switch (op) {
+        case '1':
+          login();
+          break;
+        case '2':
+          registrarUsuario();
+          break;
+        default:
+          alert("Opción no válida.");
+      }
+    }
+
+    function main() {
+      while (true) {
+        menuDeInicio();
+      }
+    }
+
+    window.onload = main;
+  </script>
+</body>
+</html>

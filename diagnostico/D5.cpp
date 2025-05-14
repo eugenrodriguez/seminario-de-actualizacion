@@ -56,7 +56,7 @@ bool contraseniaSegura(const string &contrasenia)
             if (isupper(c))
                 tieneMayuscula = true;
     
-            // No es letra ni número → es un símbolo
+            // No es letra ni número. es un símbolo
             if (!isalnum(c))
                 simbolosEspeciales++;
         }

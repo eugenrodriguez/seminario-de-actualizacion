@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login con Contraseña Segura</title>
+</head>
+<body>
+    <script>
+        function main() {
+            const usuarios = {
+                "juan": "123456",
+                "Pedro": "123456",
+                "Carlos": "1234"
+            };
+
+            function corroborar(usuario, contrasenia) {
+                return usuarios[usuario] === contrasenia;
+            }
+
+            function contraseniaSegura(contrasenia) {
+                if (contrasenia.length < 8 || contrasenia.length > 16) {
+                    return false;
+                }
+
+                let tieneMayuscula = false;
+                let simbolosEspeciales = 0;
+
+                for (let c of contrasenia) {
+                    if (c >= 'A' && c <= 'Z') {
+                        tieneMayuscula = true;
+                    }
+
+                    if (!/^[a-zA-Z0-9]$/.test(c)) {
+                        simbolosEspeciales++;
+                    }
+                }
+
+                return tieneMayuscula && simbolosEspeciales >= 2;
+            }
+
+            function cambiarContrasenia(usuario) {
+                let nuevaContrasenia;
+
+                do {
+                    nuevaContrasenia = prompt("Ingrese la nueva contraseña:");
+
+                    if (nuevaContrasenia === null) {
+                        alert("Operación cancelada.");
+                        return;
+                    }
+
+                    if (contraseniaSegura(nuevaContrasenia)) {
+                        usuarios[usuario] = nuevaContrasenia;
+                        alert("Contraseña cambiada con éxito.");
+                        break;
+                    } else {
+                        alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales.");
+                    }
+                } while (true);
+            }
+
+            function menuUsuarioAutenticado(usuario) {
+                let op;
+                do {
+                    op = prompt(
+                        "MENU DE USUARIO\n" +
+                        "1. Cambiar contraseña\n" +
+                        "X. Salir\n" +
+                        "Seleccione una opción:"
+                    );
+
+                    if (op === null) return;
+
+                    switch (op.toLowerCase()) {
+                        case "1":
+                            cambiarContrasenia(usuario);
+                            break;
+                        case "x":
+                            alert("Saliendo al inicio del sistema...");
+                            return;
+                        default:
+                            alert("Opción no válida. Intente nuevamente.");
+                    }
+                } while (true);
+            }
+
+            let intentos = 0;
+            const max_intentos = 3;
+
+            while (intentos < max_intentos) {
+                const usuario = prompt("Usuario:");
+                const contrasenia = prompt("Contraseña:");
+
+                if (usuario === null || contrasenia === null) {
+                    alert("Operación cancelada.");
+                    return;
+                }
+
+                if (corroborar(usuario, contrasenia)) {
+                    alert("¡Bienvenido/a " + usuario + "!");
+                    menuUsuarioAutenticado(usuario);
+                    break;
+                } else {
+                    intentos++;
+                    alert("Usuario y/o contraseña incorrecta.");
+                }
+
+                if (intentos === max_intentos) {
+                    alert("Usuario bloqueado. Contacte al administrador.");
+                }
+            }
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html>

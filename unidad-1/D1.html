@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D1</title>
+</head>
+<body>
+    <script type="text/javascript">
+
+        function main() {
+            const usuarios = {
+                "juan": "123456",
+                "Pedro": "123456",
+                "Carlos": "1234"
+            };
+
+            function corroborar(usuario, contrasenia) {
+                return usuarios[usuario] === contrasenia;
+            }
+
+            let intentos = 0;
+            const max_intentos = 3;
+
+            while (intentos < max_intentos) {
+                const usuario = prompt("Usuario:");
+                const contrasenia = prompt("Contraseña:");
+
+                if (corroborar(usuario, contrasenia)) {
+                    alert("¡Bienvenido/a " + usuario + "!");
+                    break;
+                } else {
+                    intentos++;
+                    alert("Usuario y/o contraseña incorrecta.");
+
+                    if (intentos === max_intentos) {
+                        alert("Usuario bloqueado. Contacte al administrador.");
+                    }
+                }
+            }
+        }
+
+        window.onload = main;
+        
+    </script>
+</body>
+</html>

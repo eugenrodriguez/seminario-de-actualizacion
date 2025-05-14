@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios y Artículos</title>
+</head>
+<body>
+  <script>
+    const usuarios = {
+      juan: "123456",
+      Pedro: "123456",
+      Carlos: "1234"
+    };
+
+    const articulos = {
+      1: { nombre: "Lavandina x 1l", precio: 875.25, stock: 3000 },
+      4: { nombre: "Detergente x 500l", precio: 1102.45, stock: 2010 },
+      22: { nombre: "Jabon en polvo x 250g", precio: 650.22, stock: 407 }
+    };
+
+    function corroborar(usuario, contrasenia) {
+      return usuarios[usuario] === contrasenia;
+    }
+
+    function contraseniaSegura(contrasenia) {
+      if (contrasenia.length < 8 || contrasenia.length > 16) return false;
+      let tieneMayuscula = /[A-Z]/.test(contrasenia);
+      let simbolosEspeciales = contrasenia.replace(/[a-zA-Z0-9]/g, "").length;
+      return tieneMayuscula && simbolosEspeciales >= 2;
+    }
+
+    function cambiarContrasenia(usuario) {
+      let nuevaContrasenia;
+      do {
+        nuevaContrasenia = prompt("Ingrese la nueva contraseña:");
+        if (contraseniaSegura(nuevaContrasenia)) {
+          usuarios[usuario] = nuevaContrasenia;
+          alert("Contraseña cambiada con éxito.");
+          break;
+        } else {
+          alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y 2 símbolos especiales.");
+        }
+      } while (true);
+    }
+
+    function menuUsuarioAutenticado(usuario) {
+      let op;
+      do {
+        op = prompt(
+          "MENU DE USUARIO\n" +
+          "1. Cambiar contraseña\n" +
+          "2. Gestión de artículos\n" +
+          "3. Salir"
+        );
+
+        switch (op) {
+          case "1":
+            cambiarContrasenia(usuario);
+            break;
+          case "2":
+            menuDeArticulos();
+            break;
+          case "3":
+            return;
+          default:
+            alert("Opción no válida. Intente nuevamente.");
+        }
+      } while (true);
+    }
+
+    function login() {
+      let intentos = 0;
+      const maxIntentos = 3;
+      while (intentos < maxIntentos) {
+        const usuario = prompt("Usuario:");
+        const contrasenia = prompt("Contraseña:");
+
+        if (corroborar(usuario, contrasenia)) {
+          alert(`¡Bienvenido/a ${usuario}!`);
+          menuUsuarioAutenticado(usuario);
+          return;
+        } else {
+          intentos++;
+          alert("Usuario y/o contraseña incorrecta.");
+        }
+
+        if (intentos === maxIntentos) {
+          alert("Usuario bloqueado. Contacte al administrador.");
+        }
+      }
+    }
+
+    function registrarUsuario() {
+      const nombre = prompt("Nombre:");
+      const apellido = prompt("Apellido:");
+      const email = prompt("Correo electrónico:");
+      const usuario = prompt("Nombre de usuario:");
+      const contrasenia = prompt("Contraseña:");
+
+      if (contraseniaSegura(contrasenia)) {
+        usuarios[usuario] = contrasenia;
+        alert("Usuario registrado con éxito.");
+        menuUsuarioAutenticado(usuario);
+      } else {
+        alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y 2 símbolos especiales.");
+        registrarUsuario();
+      }
+    }
+
+    function listarArticulos() {
+      let salida = "----- LISTADO DE ARTÍCULOS -----\n";
+      for (let id in articulos) {
+        const art = articulos[id];
+        salida += `ID: ${id} | Nombre: ${art.nombre} | Precio: $${art.precio} | Stock: ${art.stock}\n`;
+      }
+      alert(salida);
+    }
+
+    function cargarArticulo() {
+      const id = prompt("Ingrese ID del nuevo artículo:");
+      if (articulos[id]) {
+        alert("Ya existe un artículo con ese ID.");
+        return;
+      }
+
+      const nombre = prompt("Nombre:");
+      const precio = parseFloat(prompt("Precio:"));
+      const stock = parseInt(prompt("Stock:"));
+      articulos[id] = { nombre, precio, stock };
+      alert("Artículo agregado correctamente.");
+    }
+
+    function editarArticulo() {
+      const id = prompt("Ingrese el ID del artículo que desea editar:");
+      if (!articulos[id]) {
+        alert("No se encontró el artículo con ese ID.");
+        return;
+      }
+
+      const actual = articulos[id];
+      const nombre = prompt(`Nuevo nombre (actual: ${actual.nombre}):`) || actual.nombre;
+      const precio = parseFloat(prompt(`Nuevo precio (actual: ${actual.precio}):`)) || actual.precio;
+      const stock = parseInt(prompt(`Nuevo stock (actual: ${actual.stock}):`)) || actual.stock;
+
+      articulos[id] = { nombre, precio, stock };
+      alert("Artículo editado correctamente.");
+    }
+
+    function eliminarArticulo() {
+      const id = prompt("Ingrese el ID del artículo a eliminar:");
+      if (articulos[id]) {
+        delete articulos[id];
+        alert("Artículo eliminado con éxito.");
+      } else {
+        alert("No se encontró ningún artículo con ese ID.");
+      }
+    }
+
+    function menuDeArticulos() {
+      let op;
+      do {
+        op = prompt(
+          "----- MENÚ DE ARTÍCULOS -----\n" +
+          "1. Listar artículos\n" +
+          "2. Cargar artículo\n" +
+          "3. Editar artículo\n" +
+          "4. Eliminar artículo\n" +
+          "5. Volver"
+        );
+
+        switch (op) {
+          case "1": listarArticulos(); break;
+          case "2": cargarArticulo(); break;
+          case "3": editarArticulo(); break;
+          case "4": eliminarArticulo(); break;
+          case "5": return;
+          default: alert("Opción inválida.");
+        }
+      } while (true);
+    }
+
+    function menuDeInicio() {
+      const op = prompt(
+        "----- MENÚ DE INICIO -----\n" +
+        "1. Iniciar sesión\n" +
+        "2. Crear cuenta de usuario"
+      );
+
+      switch (op) {
+        case "1": login(); break;
+        case "2": registrarUsuario(); break;
+        default: alert("Opción inválida.");
+      }
+    }
+
+    function main() {
+      while (true) {
+        menuDeInicio();
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>

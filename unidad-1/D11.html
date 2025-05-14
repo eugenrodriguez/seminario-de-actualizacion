@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Traducción de C++ a JavaScript</title>
+</head>
+<body>
+    <input type="file" id="uploadStockFile" accept=".json" style="display:none;">
+    <script>
+        const Rol = {
+            Administrador: 0,
+            Cliente: 1,
+            Vendedor: 2,
+            TrabajadorDeposito: 3
+        };
+
+        let articulos = new Map([
+            [1, { nombre: "Lavandina x 1l", precio: 875.25, stock: 3000 }],
+            [4, { nombre: "Detergente x 500l", precio: 1102.45, stock: 2010 }],
+            [22, { nombre: "Jabon en polvo x 250g", precio: 650.22, stock: 407 }]
+        ]);
+
+        let usuarios = new Map([
+            ["juan", { nombreDeUsuario: "juan", contrasenia: "123456", rol: Rol.Administrador }],
+            ["pedro", { nombreDeUsuario: "pedro", contrasenia: "12345", rol: Rol.Cliente }],
+            ["carlos", { nombreDeUsuario: "carlos", contrasenia: "1234", rol: Rol.Vendedor }],
+            ["franco", { nombreDeUsuario: "franco", contrasenia: "fran123", rol: Rol.TrabajadorDeposito }]
+        ]);
+
+        function corroborar(usuario, contrasenia) {
+            const user = usuarios.get(usuario);
+            return user && user.contrasenia === contrasenia;
+        }
+
+        function contraseniaSegura(contrasenia) {
+            if (contrasenia.length < 8 || contrasenia.length > 16) {
+                return false;
+            }
+
+            let tieneMayuscula = false;
+            let simbolosEspeciales = 0;
+
+            for (const char of contrasenia) {
+                if (char === char.toUpperCase() && char !== char.toLowerCase()) {
+                    tieneMayuscula = true;
+                }
+
+                if (!/[a-zA-Z0-9]/.test(char)) {
+                    simbolosEspeciales++;
+                }
+            }
+
+            return tieneMayuscula && simbolosEspeciales >= 2;
+        }
+
+        function cambiarContrasenia(usuario) {
+            let nuevaContrasenia;
+            while (true) {
+                nuevaContrasenia = prompt("Ingrese la nueva contraseña:");
+                if (contraseniaSegura(nuevaContrasenia)) {
+                    usuarios.get(usuario).contrasenia = nuevaContrasenia;
+                    alert("Contraseña cambiada con éxito.");
+                    break;
+                } else {
+                    alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales.");
+                }
+            }
+        }
+
+        function actualizarStockDesdeJSON(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        let actualizaciones = 0;
+                        for (const id in data) {
+                            const itemId = parseInt(id);
+                            if (articulos.has(itemId) && typeof data[id].stock === 'number') {
+                                articulos.get(itemId).stock = data[id].stock;
+                                actualizaciones++;
+                            } else {
+                                alert(`Advertencia: No se encontró el artículo con ID ${itemId} o el stock no es válido en el archivo.`);
+                            }
+                        }
+                        alert(`Se actualizaron ${actualizaciones} registros de stock.`);
+                    } catch (error) {
+                        alert("Error al leer o analizar el archivo JSON.");
+                        console.error("Error al procesar JSON:", error);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+function menuUsuarioAutenticado(usuario) {
+    const rol = usuarios.get(usuario).rol;
+    let op;
+    do {
+        let menu = "MENU DE USUARIO\n";
+        menu += "1. Cambiar contraseña\n";
+        menu += "2. Gestion de articulos\n";
+        if (rol === Rol.Administrador) {
+            menu += "3. Gestion de usuarios\n";
+            menu += "4. Actualizar stock desde JSON\n"; // Nueva opción para administradores
+        }
+        menu += "0. Salir\n";
+        menu += "Seleccione una opción: ";
+
+        op = prompt(menu);
+
+        switch (parseInt(op)) {
+            case 1:
+                cambiarContrasenia(usuario);
+                break;
+            case 2:
+                menuDeArticulos(usuario);
+                break;
+            case 3:
+                if (rol === Rol.Administrador) {
+                    registrarUsuario();
+                } else {
+                    alert("Acceso denegado. Solo administradores pueden gestionar usuarios.");
+                }
+                break;
+            case 4:
+                if (rol === Rol.Administrador) {
+                    document.getElementById('uploadStockFile').click();
+                } else {
+                    alert("Acceso denegado. Solo administradores pueden actualizar el stock.");
+                }
+                break;
+            case 0:
+                alert("Saliendo al inicio del sistema...");
+                menuDeInicio();
+                return;
+            default:
+                alert("Opción no válida. Intente nuevamente.");
+        }
+    } while (true);
+}
+
+        function login() {
+            let usuario, contrasenia;
+            let intentos = 0;
+            const max_intentos = 3;
+
+            while (intentos < max_intentos) {
+                usuario = prompt("Usuario:");
+                contrasenia = prompt("Contraseña:");
+
+                if (corroborar(usuario, contrasenia)) {
+                    alert(`¡Bienvenido/a ${usuario}!`);
+                    menuUsuarioAutenticado(usuario);
+                    return;
+                } else {
+                    intentos++;
+                    alert("Usuario y/o contraseña incorrecta.");
+                }
+
+                if (intentos === max_intentos) {
+                    alert("Usuario bloqueado. Contacte al administrador.");
+                    return;
+                }
+            }
+        }
+
+        function registrarUsuario() {
+            const nombre = prompt("Nombre:");
+            const apellido = prompt("Apellido:");
+            const email = prompt("Correo Electronico:");
+            const usuario = prompt("Nombre de usuario:");
+            let contrasenia;
+            do {
+                contrasenia = prompt("Contrasenia:");
+                if (!contraseniaSegura(contrasenia)) {
+                    alert("La contraseña debe tener entre 8 y 16 caracteres, al menos una mayúscula y al menos 2 símbolos especiales. Intente nuevamente.");
+                }
+            } while (!contraseniaSegura(contrasenia));
+
+            let rolSeleccionado;
+            do {
+                rolSeleccionado = parseInt(prompt(
+                    "Seleccione el rol del usuario:\n" +
+                    "(1) Administrador.\n" +
+                    "(2) Cliente.\n" +
+                    "(3) Vendedor.\n" +
+                    "(4) Trabajador de deposito."
+                ));
+            } while (isNaN(rolSeleccionado) || rolSeleccionado < 1 || rolSeleccionado > 4);
+
+            let rol;
+            switch (rolSeleccionado) {
+                case 1:
+                    rol = Rol.Administrador;
+                    break;
+                case 2:
+                    rol = Rol.Cliente;
+                    break;
+                case 3:
+                    rol = Rol.Vendedor;
+                    break;
+                case 4:
+                    rol = Rol.TrabajadorDeposito;
+                    break;
+                default:
+                    alert("Opción inválida.");
+                    return;
+            }
+
+            usuarios.set(usuario, { nombreDeUsuario: usuario, contrasenia: contrasenia, rol: rol });
+            alert("Usuario registrado con éxito.");
+        }
+
+        function listarArticulos() {
+            let lista = "---------------Listado de Articulos----------------\n";
+            for (const [id, articulo] of articulos) {
+                lista += `ID: ${id} | Nombre: ${articulo.nombre} | Precio: $${articulo.precio} | Stock: ${articulo.stock}\n`;
+            }
+            alert(lista);
+        }
+
+        function cargarArticulo() {
+            const id = parseInt(prompt("Ingrese ID del nuevo articulo:"));
+            if (articulos.has(id)) {
+                alert("Ya existe un articulo con ese ID.");
+                return;
+            }
+
+            const nombre = prompt("Nombre:");
+            const precio = parseFloat(prompt("Precio:"));
+            const stock = parseInt(prompt("Stock:"));
+
+            articulos.set(id, { nombre: nombre, precio: precio, stock: stock });
+            alert("Articulo agregado correctamente");
+        }
+
+        function editarArticulo() {
+            const id = parseInt(prompt("Ingrese el ID del articulo que desea editar:"));
+            const articulo = articulos.get(id);
+            if (!articulo) {
+                alert("No se encontró el artículo con ese ID");
+                return;
+            }
+
+            articulo.nombre = prompt(`Nuevo nombre (actual: ${articulo.nombre}):`, articulo.nombre);
+            articulo.precio = parseFloat(prompt(`Nuevo precio (actual: $${articulo.precio}):`, articulo.precio));
+            articulo.stock = parseInt(prompt(`Nuevo stock (actual: ${articulo.stock}):`, articulo.stock));
+
+            alert("Articulo editado correctamente");
+        }
+
+        function eliminarArticulo() {
+            const id = parseInt(prompt("Ingrese el ID del articulo a eliminar:"));
+            if (articulos.delete(id)) {
+                alert("Articulo eliminado con exito.");
+            } else {
+                alert("No se encontro ningun articulo con ese ID");
+            }
+        }
+
+        function comprarArticulo() {
+            const id = parseInt(prompt("Ingrese el ID del articulo que desea comprar:"));
+            const articulo = articulos.get(id);
+            if (!articulo) {
+                alert("No se encontro ningun articulo con ese ID.");
+                return;
+            }
+
+            const cantidad = parseInt(prompt(`Articulo: ${articulo.nombre} | Stock disponible: ${articulo.stock}\nCuantas unidades desea comprar?`));
+
+            if (cantidad <= 0) {
+                alert("La cantidad debe ser mayor que cero.");
+                return;
+            } else if (cantidad > articulo.stock) {
+                alert("Error: No hay suficiente stock disponible.");
+                return;
+            } else {
+                articulo.stock -= cantidad;
+                alert("Compra realizada con exito.");
+            }
+        }
+
+        function menuDeArticulos(usuario) {
+            const rol = usuarios.get(usuario).rol;
+            let op;
+            do {
+                let menu = "---------------Menu de Articulos----------------\n";
+                menu += "1. Listar articulos\n";
+                if (rol === Rol.Administrador || rol === Rol.TrabajadorDeposito) {
+                    menu += "2. Cargar articulo\n";
+                    menu += "4. Eliminar articulo\n";
+                }
+                if (rol === Rol.Administrador || rol === Rol.Vendedor || rol === Rol.TrabajadorDeposito) {
+                    menu += "3. Editar articulo\n";
+                }
+                if (rol === Rol.Administrador || rol === Rol.Vendedor || rol === Rol.Cliente) {
+                    menu += "5. Comprar articulo\n";
+                }
+                menu += "0. Volver al menu principal\n";
+                menu += "Seleccione una opcion:";
+
+                op = prompt(menu);
+
+                switch (parseInt(op)) {
+                    case 1:
+                        listarArticulos();
+                        break;
+                    case 2:
+                        if (rol === Rol.Administrador || rol === Rol.TrabajadorDeposito) {
+                            cargarArticulo();
+                        } else {
+                            alert("Acción no permitida para su rol.");
+                        }
+                        break;
+                    case 3:
+                        if (rol === Rol.Administrador || rol === Rol.Vendedor || rol === Rol.TrabajadorDeposito) {
+                            editarArticulo();
+                        } else {
+                            alert("Acción no permitida para su rol.");
+                        }
+                        break;
+                    case 4:
+                        if (rol === Rol.Administrador || rol === Rol.TrabajadorDeposito) {
+                            eliminarArticulo();
+                        } else {
+                            alert("Acción no permitida para su rol.");
+                        }
+                        break;
+                    case 5:
+                        if (rol === Rol.Administrador || rol === Rol.Vendedor || rol === Rol.Cliente) {
+                            comprarArticulo();
+                        } else {
+                            alert("Acción no permitida para su rol.");
+                        }
+                        break;
+                    case 0:
+                        return;
+                    default:
+                        alert("Opcion invalida");
+                        break;
+                }
+            } while (true);
+        }
+
+        function menuDeInicio() {
+            let op;
+            do {
+                op = prompt(
+                    "----------------Menu de inicio---------------\n" +
+                    "1. Iniciar sesion\n" +
+                    "0. Salir\n" +
+                    "Seleccione una opcion:"
+                );
+                switch (parseInt(op)) {
+                    case 1:
+                        login();
+                        return;
+                    case 0:
+                        alert("Saliendo del sistema...");
+                        return;
+                    default:
+                        alert("Opcion invalida.");
+                }
+            } while (true);
+        }
+
+        function main() {
+            while (true) {
+                menuDeInicio();
+            }
+        }
+
+        document.getElementById('uploadStockFile').addEventListener('change', actualizarStockDesdeJSON);
+
+        window.onload = main;
+    </script>
+</body>
+</html>
