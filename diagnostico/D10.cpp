@@ -2,7 +2,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <fstream>
 
 #include <map>
 
@@ -14,6 +13,20 @@ enum Rol {
     Vendedor,
     TrabajadorDeposito
 };
+
+bool corroborar(const string &usuario, const string &contrasenia);
+bool contraseniaSegura(const string &contrasenia);
+void cambiarContrasenia(string usuario, map<string, string> &usuarios);
+void menuUsuarioAutenticado(string usuario, map<string, string> &usuarios);
+void login();
+void registrarUsuario();
+void menuDeInicio();
+void listarArticulos();
+void cargarArticulo();
+void editarArticulo();
+void eliminarArticulo();
+void comprarArticulo();
+void menuDeArticulos(string usuario);
 
 struct Articulo {
     string nombre;
@@ -39,22 +52,6 @@ map<string, Usuario> usuarios = {
     {"carlos", {"carlos", "1234", Vendedor}},
     {"franco", {"franco", "fran123", TrabajadorDeposito}}
 };
-
-bool corroborar(const string &usuario, const string &contrasenia);
-bool contraseniaSegura(const string &contrasenia);
-void cambiarContrasenia(string usuario, map<string, string> &usuarios);
-void menuUsuarioAutenticado(string usuario, map<string, string> &usuarios);
-void login();
-void registrarUsuario(map<string, Usuario>& usuarios);
-void menuDeInicio();
-void listarArticulos();
-void cargarArticulo();
-void editarArticulo();
-void eliminarArticulo();
-void comprarArticulo();
-void menuDeArticulos(string usuario);
-void eliminarUsuario(map<string, Usuario> &usuarios);
-void menuGestionUsuarios(map<string, Usuario> &usuarios);
     
 
 bool corroborar(const string &usuario, const string &contrasenia)
@@ -122,7 +119,7 @@ void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
         cout << "1. Cambiar contraseña" << endl;
         cout << "2. Gestion de articulos" << endl;
         if (rol == Administrador) {
-            cout << "3. Gestion de usuarios" << endl; 
+            cout << "3. Gestion de usuarios" << endl; // SOLO para administradores
         }
         cout << "0. Salir" << endl;
         cout << "Seleccione una opción: ";
@@ -135,7 +132,7 @@ void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
             break;
         case 3: 
             if (rol == Administrador) {
-                menuGestionUsuarios(usuarios);
+                registrarUsuario(); 
             } else {
                 cout << "Acceso denegado. Solo administradores pueden gestionar usuarios." << endl;
             }
@@ -149,41 +146,6 @@ void menuUsuarioAutenticado(string usuario, map<string, Usuario> &usuarios)
         }
     } while (true);
 }
-
-void menuGestionUsuarios(map<string, Usuario> &usuarios) {
-    int op;
-    cout << "--------------- Gestion de Usuarios ---------------" << endl;
-    cout << "1. Agregar usuario" << endl;
-    cout << "2. Eliminar usuario" << endl;
-    cout << "0. Volver" << endl;
-    cout << "Seleccione una opción: ";
-    cin >> op;
-
-    switch (op) {
-        case 1: registrarUsuario(usuarios); 
-        break;
-        case 2: eliminarUsuario(usuarios); 
-        break;
-        case 0: return;
-        break;
-        default: cout << "Opción invalida." << endl;
-    }
-}
-
-void eliminarUsuario(map<string, Usuario> &usuarios) {
-    string usuario;
-    cout << "Ingrese el nombre de usuario a eliminar: ";
-    cin >> usuario;
-
-    if (usuarios.find(usuario) != usuarios.end()) {
-        usuarios.erase(usuario);
-        cout << "Usuario eliminado con éxito." << endl;
-    } else {
-        cout << "No se encontró el usuario." << endl;
-    }
-}
-
-
 
 void login()
 {
@@ -216,7 +178,7 @@ void login()
     }
 }
 
-void registrarUsuario(map<string, Usuario>& usuarios)
+void registrarUsuario()
 {
     string nombre, apellido, email, usuario, contrasenia;
     int rolSeleccionado;
@@ -441,7 +403,7 @@ void menuDeInicio()
     {
         case 1: login();
         break;
-        case 2: cout << "Saliendo del sistema..." << endl;
+        case 0: cout << "Saliendo del sistema..." << endl;
         exit(0);
         default: cout << "Opcion invalida." << endl;
     }

@@ -2,7 +2,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <sstream>
 
 #include <map>
 
@@ -404,7 +403,7 @@ void menuDeInicio()
     {
         case 1: login();
         break;
-        case 2: cout << "Saliendo del sistema..." << endl;
+        case 0: cout << "Saliendo del sistema..." << endl;
         exit(0);
         default: cout << "Opcion invalida." << endl;
     }
