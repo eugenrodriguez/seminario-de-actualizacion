@@ -124,8 +124,8 @@ class UI {
         while (true) {
             const nueva = prompt("Ingrese la nueva contraseña:");
             if (nueva === null) {
-                alert("Cambio de contraseña cancelado.");
-                break;  
+            alert("Cambio de contraseña cancelado.");
+            break;  
             }
             if (this.model.contraseniaSegura(nueva)) {
                 this.model.cambiarContrasenia(usuario, nueva);
