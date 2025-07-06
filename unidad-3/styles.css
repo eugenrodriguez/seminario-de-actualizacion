@@ -1,0 +1,88 @@
+/* styles.css */
+
+.contenedor-calculadora {
+  display: grid;
+  grid-template-columns: repeat(4, 70px);
+  gap: 15px;
+  background: white;
+  border: 7px solid blue;
+  padding: 30px;
+  border-radius: 30px;
+  width: max-content;
+  margin: 30px auto;
+  box-shadow: 8px 8px 15px blue;
+}
+
+
+.boton {
+  border-radius: 15px;
+  width: 70px;
+  height: 70px;
+  border: none;
+  color: white;
+  font-size: 20px;
+}
+
+.boton:hover {
+  cursor: pointer;
+}
+
+.azul {
+  background-color: rgb(41, 109, 255);
+  box-shadow: 0px 8px 0px blue;
+  transition: box-shadow 0.2s ease;
+}
+
+.azul:hover {
+  box-shadow: 0px 5px 0px blue;
+}
+
+.verde {
+  background-color: rgb(33, 255, 33);
+  box-shadow: 0px 8px 0px rgb(27, 198, 27);
+  transition: box-shadow 0.2s ease;
+}
+
+.verde:hover {
+  box-shadow: 0px 5px 0px rgb(27, 198, 27);
+}
+
+.amarillo {
+  background-color: rgb(255, 255, 41);
+  box-shadow: 0px 8px 0px rgb(191, 191, 0);
+  transition: box-shadow 0.2s ease;
+}
+
+.amarillo:hover {
+  box-shadow: 0px 5px 0px rgb(191, 191, 0);
+}
+
+.visor-numeros {
+  width: 100%;
+  border: solid black 1px;
+  text-align: right;
+  height: 70px;
+  border-radius: 8px;
+  box-shadow: inset 3px 4px 4px grey;
+  transition: box-shadow 0.2s;
+  font-size: 30px;
+}
+
+.visor-numeros:hover {
+  box-shadow: inset 3px 3px 4px rgb(66, 66, 66);
+}
+
+.borrar {
+  width: 100%;
+  background-color: rgb(251, 42, 42);
+  text-align: center;
+  height: 70px;
+  border-radius: 15px;
+  box-shadow: 0px 8px 0px rgb(173, 0, 0);
+  border: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.borrar:hover {
+  box-shadow: 0px 5px 0px rgb(173, 0, 0);
+}
